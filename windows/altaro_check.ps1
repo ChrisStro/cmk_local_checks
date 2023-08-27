@@ -39,7 +39,7 @@ if (-not (Test-Path -Path $AltaroCmdletsPath)) {
 }
 
 # Load helper function for checkmk output
-. $PSScriptRoot\win_helper.ps1
+. $PSScriptRoot\cmk_helper.ps1
 
 # Override Write-Host with Write-Output to get data into pipeline from BuiltIn Altaro CMDLETS
 New-Alias -Name Write-Host -Value Write-Output

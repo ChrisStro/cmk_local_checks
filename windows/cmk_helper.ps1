@@ -5,13 +5,13 @@
 ## My output text which may contain spaces  Statusdetail            Details zum Status, wie sie in Checkmk angezeigt werden. Dieser Teil kann auch Leerzeichen enthalten.
 ##
 enum cmkstatus {
-    OK      = 0
-    WARN    = 1
-    CRIT    = 2
-    UNKNOWN = 3
+    OK          = 0
+    WARN        = 1
+    CRIT        = 2
+    UNKNOWN     = 3
 }
 
-class CheckmkService {
+class CmkService {
     [cmkstatus]$State
     [string] $Service
     [string] $Detail
@@ -22,7 +22,7 @@ class CheckmkService {
     [int] $MetricMin
     [int] $MetricMax
 
-    # Workaround costructor chaining
+    # Workaround constructor chaining
     hidden [void] Init ($State, $Service, $Detail) {
         $this.State    = $State
         $this.Service  = $Service
@@ -44,26 +44,24 @@ class CheckmkService {
         $this.MetricMax     = $MetricMax
     }
 
-    CheckmkService($State, $Service, $Detail) {
+    CmkService($State, $Service, $Detail) {
 
         $this.Init($State, $Service, $Detail)
     }
 
-    CheckmkService($State, $Service, $Detail, $MetricName, [int]$MetricValue) {
+    CmkService($State, $Service, $Detail, $MetricName, [int]$MetricValue) {
 
         $this.Init($State, $Service, $Detail, $MetricName, $MetricValue)
     }
 
-    CheckmkService($Service, $Detail, $MetricName, [int]$MetricValue, [int]$MetricWarn, [int]$MetricCrit, [int]$MetricMin, [int]$MetricMax) {
+    CmkService($Service, $Detail, $MetricName, [int]$MetricValue, [int]$MetricWarn, [int]$MetricCrit, [int]$MetricMin, [int]$MetricMax) {
         $this.Init($Service, $Detail, $MetricName, $MetricValue, $MetricWarn, $MetricCrit, $MetricMin, $MetricMax)
     }
 
     hidden [string]GetMetricString() {
-        # metricname=value;warn;crit;min;max
-        # count=73;80;90;0;100
-        $metricString =  '{0}={1};{2};{3};{4};{5}' -f $this.MetricName, $this.MetricValue, $this.MetricWarn ,$this.MetricCrit ,$this.MetricMin ,$this.MetricMax
-        if (-not ($this.MetricWarn)) {
-            $metricString = '{0}={1}' -f $this.MetricName, $this.MetricValue
+        $metricString = '{0}={1}' -f $this.MetricName, $this.MetricValue
+        if ($this.MetricWarn) {
+            $metricString =  '{0}={1};{2};{3};{4};{5}' -f $this.MetricName, $this.MetricValue, $this.MetricWarn ,$this.MetricCrit ,$this.MetricMin ,$this.MetricMax
         }
         return $metricString
     }
@@ -76,7 +74,7 @@ class CheckmkService {
     }
 }
 
-function New-CheckmkService {
+function New-CmkService {
     [CmdletBinding()]
     param (
         [Parameter(ValueFromPipelineByPropertyName, Mandatory, ParameterSetName = 'Simple')]
@@ -109,13 +107,13 @@ function New-CheckmkService {
 
     process {
         if ($PSCmdlet.ParameterSetName -eq "Simple") {
-            [CheckmkService]::new($State, $Service, $Detail)
+            [CmkService]::new($State, $Service, $Detail)
         }
         if ($PSCmdlet.ParameterSetName -eq "NameValue") {
-            [CheckmkService]::new($State, $Service, $Detail, $MetricName, $MetricValue)
+            [CmkService]::new($State, $Service, $Detail, $MetricName, $MetricValue)
         }
         if ($PSCmdlet.ParameterSetName -eq "StateCalculated") {
-            [CheckmkService]::new($Service, $Detail, $MetricName, $MetricValue, $MetricWarn, $MetricCrit, $MetricMin, $MetricMax)
+            [CmkService]::new($Service, $Detail, $MetricName, $MetricValue, $MetricWarn, $MetricCrit, $MetricMin, $MetricMax)
         }
     }
 }
@@ -123,11 +121,11 @@ function New-CheckmkService {
 function Write-CMKOutput {
     [CmdletBinding()]
     param (
-        [Parameter(ValueFromPipeline, Mandatory)][CheckmkService]$CheckmkService
+        [Parameter(ValueFromPipeline, Mandatory)][CmkService]$CmkService
     )
 
     process {
-        $CheckmkService.ToString()
+        $CmkService.ToString()
     }
 
 }

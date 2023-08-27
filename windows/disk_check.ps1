@@ -1,7 +1,7 @@
 $CMK_VERSION = "2.2.0p7"
 
 # Load helper function for checkmk output
-. $PSScriptRoot\win_helper.ps1
+. $PSScriptRoot\cmk_helper.ps1
 
 $disks = get-disk
 $output = $disks | ForEach-Object {
